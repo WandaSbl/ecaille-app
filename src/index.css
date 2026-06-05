@@ -1,0 +1,15 @@
+html, body, #root {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: #ffffff;
+  color: #003b08;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+* {
+  box-sizing: border-box;
+}
