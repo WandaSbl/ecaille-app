@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { Event } from '../types'
+import { useAdmin } from '../hooks/useAdmin'
 
 const EVENT_COLORS: Record<string, string> = {
   Répétition: '#ed81ef',
@@ -16,8 +17,8 @@ const EVENT_BACKGROUND: Record<string, string> = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  'En attente orga': '#a34df3',
-  'En attente musiciens': '#fdee18',
+  'En attente orga': '#b1a9b8',
+  'En attente musiciens': '#b1a9b8',
   'Confirmé': '#007400'
 }
 
@@ -58,6 +59,7 @@ function AgendaPage() {
   const navigate = useNavigate()
   const eventsSectionRef = useRef<HTMLDivElement>(null)
   const [attendances, setAttendances] = useState<Record<string, boolean>>({})
+  const { isAdmin, loading:adminLoading } = useAdmin()
 
   useEffect(() => {
     const updateOnlineStatus = () => setOffline(!navigator.onLine)
@@ -222,9 +224,19 @@ function AgendaPage() {
           <h2>Agenda général</h2>
         </div>
         <div>
-          <button className="button button-primary" onClick={() => navigate('/events/new')}>
+          {!adminLoading && isAdmin && (<button className="button button-primary" onClick={() => navigate('/events/new')}>
             Ajouter un événement
-          </button>
+          </button>)}
+          
+          {!adminLoading && isAdmin && (
+            <button
+              className="button button-secondary"
+              onClick={() => navigate('/admin')}
+            >
+              Administration
+            </button>
+          )}
+
           <button className="button button-secondary" onClick={handleLogout}>
             Se déconnecter
           </button>

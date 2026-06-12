@@ -39,7 +39,6 @@
   text-transform: uppercase;
   font-size: 4rem;
   letter-spacing:10px;
-  /*font-weight:700;*/
   margin: 0;
   background: linear-gradient(
     90deg,
@@ -187,17 +186,11 @@
 }
 
 .card {
-  /*background: rgba(217, 253, 217, 0.658);
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  border-radius: 24px;
-  padding: 22px;
-  margin-bottom: 18px;
-  box-shadow: 0 18px 50px rgba(15, 42, 23, 0.15);*/
   width: 100%;
   background: rgb(255, 255, 255);/*linear-gradient(135deg, #22c55e 0%, #0ea5e9 100%);*/
   border: 1px solid rgba(63, 173, 103, 0.3);
   border-radius: 24px;
-  padding: 40px 30px;
+  padding: 10px 30px;
   box-shadow: 0 18px 50px rgba(15, 23, 42, 0.15), 0 0 60px rgba(34, 197, 94, 0.1);
   backdrop-filter: blur(10px);
   transition: transform 0.16s ease, box-shadow 0.16s ease;
@@ -311,7 +304,7 @@
   border-radius: 999px;
   width: 38px;
   height: 38px;
-  background: #18b5a0;
+  background: linear-gradient(135deg, #22c55e 0%, #0ea5e9 100%);
   color: #f8fafc;
   cursor: pointer;
 }
@@ -396,8 +389,8 @@
 }
 
 .calendar-dot {
-  width: 10px;
-  height: 10px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
 }
 
@@ -438,14 +431,6 @@
 }
 
 .event-card {
-  /*display: block;
-  background: #20C168;
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  border-radius: 24px;
-  padding: 20px;
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
-  text-decoration: none;
-  color: white;*/
   display:flex;
   flex-direction:column;
   justify-content:space-between;
@@ -459,6 +444,25 @@
   transition: transform 0.16s ease, box-shadow 0.16s ease;
   text-decoration: none;
   color:#18B5A0;
+}
+
+.setlists-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.setlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.setlist-duration {
+  margin-left: 8px;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: normal;
 }
 
 .event-card:hover {
@@ -532,6 +536,155 @@
 .button-presence--absent:hover {
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
   transform: translateY(-1px);
+}
+
+.setlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.setlist-duration {
+  margin-left: 8px;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: normal;
+}
+
+.remove-setlist {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 25px;
+  color: #7c3aed; /* violet comme sur ta capture */
+}
+
+
+.sortable-song-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.sortable-song button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.sortable-song {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 10px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  cursor: grab;
+}
+
+.sortable-song:active {
+  cursor: grabbing;
+}
+
+.song-name {
+  flex: 1;
+}
+
+.remove-song {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.song-name {
+  flex: 1;
+}
+
+.musicians-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+
+.musicians-list li {
+  margin-bottom: 6px;
+}
+
+.songs-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.song-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 60px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.song-name {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+}
+
+.song-duration {
+  text-align: center;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.song-duration-input {
+  width: 70px;
+  text-align: center;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #475569;
+}
+
+.song-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.song-add {
+  display: grid;
+  grid-template-columns: 1fr 120px auto;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.delete-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #e2e8f0;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 0.2s ease;
+}
+
+.delete-button:hover {
+  background: #ef4444;
+  color: white;
 }
 
 @media (max-width: 768px) {

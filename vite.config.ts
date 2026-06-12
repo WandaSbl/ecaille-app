@@ -6,25 +6,52 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      injectRegister: 'auto',
       registerType: 'autoUpdate',
+
+      devOptions: {
+        enabled: true,
+      },
+
+      workbox: {
+          navigateFallbackDenylist: [/^\/api/],
+      },
+
       manifest: {
         name: 'Écaille',
         short_name: 'Écaille',
-        start_url: '/',
+        description: 'Agenda et setlists du groupe',
+        theme_color: '#10B981',
+        background_color: '#ffffff',
         display: 'standalone',
-        background_color: '#0f172a',
-        theme_color: '#2563eb',
+
         icons: [
           {
-            src: '/icon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml'
+            src: '/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable'
+          },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,json}']
-      }
-    })
-  ]
+    }),
+  ],
 })

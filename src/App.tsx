@@ -5,6 +5,7 @@ import EventDetailPage from './pages/EventDetailPage'
 import EventFormPage from './pages/EventFormPage'
 import { useSupabaseSession } from './hooks/useSupabaseSession'
 import '../src/App.css'
+import AdminPage from './pages/Admin'
 
 function App() {
   const { session, loading } = useSupabaseSession()
@@ -15,29 +16,43 @@ function App() {
 
   return (
     <div className="app-shell">
-      { <header className="app-header">
+      <header className="app-header">
         <h1>Écaille</h1>
-      </header>}
+      </header>
 
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+
         <Route
           path="/agenda"
           element={session ? <AgendaPage /> : <Navigate to="/login" replace />}
         />
+
         <Route
           path="/events/new"
           element={session ? <EventFormPage /> : <Navigate to="/login" replace />}
         />
+
         <Route
           path="/events/:id/edit"
           element={session ? <EventFormPage /> : <Navigate to="/login" replace />}
         />
+
         <Route
           path="/events/:id"
           element={session ? <EventDetailPage /> : <Navigate to="/login" replace />}
         />
-        <Route path="/" element={<Navigate to={session ? '/agenda' : '/login'} replace />} />
+
+        <Route
+          path="/"
+          element={<Navigate to={session ? '/agenda' : '/login'} replace />}
+        />
+
+        <Route
+          path="/admin"
+          element={session ? <AdminPage /> : <Navigate to="/login" replace />}
+        />
+
       </Routes>
     </div>
   )
