@@ -46,7 +46,7 @@ function EventDetailPage() {
       const { data, error } = await supabase
         .from('EVENT')
         .select(
-          '*, EVENT_TYPE(name), EVENT_STATUS(name), EVENT_MUSICIANS(*, MUSICIANS(*)), EVENT_SONGS(*, SONGS(*))'
+          '*, event_type:EVENT_TYPE(name), event_status:EVENT_STATUS(name), event_musicians:EVENT_MUSICIANS(*, musicians:MUSICIANS(*)), event_songs:EVENT_SONGS(*, songs:SONGS(*))'
         )
         .eq('id', Number(id))
         .single()
@@ -128,10 +128,6 @@ function EventDetailPage() {
               </div>
 
               <div style={{ textAlign: 'right', display: 'flex', gap: 8 }}>
-                {event.event_status?.name && (
-                  <span className="event-label">{event.event_status.name}</span>
-                )}
-
                 {isAdmin && (
                   <button
                     className="button button-secondary"
@@ -176,7 +172,7 @@ function EventDetailPage() {
                     )
 
                     const duration = getSetListDuration(
-                      orderedSongs.map(s => s.SONGS)
+                      orderedSongs.map(s => s.songs)
                     )
 
                     return (
@@ -191,10 +187,10 @@ function EventDetailPage() {
                         <ol>
                           {orderedSongs.map((item) => (
                             <li key={item.id}>
-                              {item.SONGS?.name}
-                              {item.SONGS?.duration && (
+                              {item.songs?.name}
+                              {item.songs?.duration && (
                                 <span style={{ marginLeft: 8, color: '#64748b', fontSize: 13 }}>
-                                  ({formatDuration(item.SONGS.duration)})
+                                  ({formatDuration(item.songs?.duration)})
                                 </span>
                               )}
                             </li>
@@ -219,7 +215,7 @@ function EventDetailPage() {
                 {event.event_musicians
                   .filter(item => item.is_present)
                   .map(item => (
-                    <li key={item.id}>{item.musician?.name}</li>
+                    <li key={item.id}>{item.musicians?.name}</li>
                   ))}
               </ul>
 
@@ -228,7 +224,7 @@ function EventDetailPage() {
                 {event.event_musicians
                   .filter(item => item.is_present === false)
                   .map(item => (
-                    <li key={item.id}>{item.musician?.name}</li>
+                    <li key={item.id}>{item.musicians?.name}</li>
                   ))}
               </ul>
               </>

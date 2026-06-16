@@ -36,7 +36,7 @@ export type EventMusician = {
   event_id: number
   musician_id: number
   is_present: boolean | null
-  musician?: Musician
+  musicians?: Musician
 }
 
 export type Event = {

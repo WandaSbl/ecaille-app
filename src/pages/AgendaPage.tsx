@@ -76,7 +76,7 @@ function AgendaPage() {
       setLoading(true)
       const { data, error } = await supabase
         .from('EVENT')
-        .select('*, EVENT_TYPE(name), EVENT_STATUS(name)')
+        .select('*, event_type: EVENT_TYPE(name), event_status:EVENT_STATUS(name)')
         .order('date_from', { ascending: true })
 
       if (error) {
@@ -149,8 +149,8 @@ function AgendaPage() {
   
 
   const getEventStatusColor = (statusName?: string) => {
-    if (!statusName) return '#94a3b8'
-    return STATUS_COLORS[statusName] ?? '#94a3b8'
+    if (statusName == "Confirmé") return '#20c26d';
+    return '#94a3b8'
   }
 
   const handleDayClick = (day: Date) => {
@@ -190,7 +190,7 @@ function AgendaPage() {
     return !current                          // ensuite toggle
   }
 
-  async function togglePresence(eventId: string, nextState: boolean) {
+  async function togglePresence(eventId: number, nextState: boolean) {
     const musician = await getCurrentMusician()
     if (!musician) return
 
@@ -277,7 +277,7 @@ function AgendaPage() {
                 {isToday ? <span className="calendar-day-today"></span> : null}
                 <div className="calendar-dots">
                   {eventsForDay.slice(0, 3).map((event) => (
-                    <span key={event.id} className="calendar-dot" style={{ backgroundColor: getDotColor(event.EVENT_TYPE?.name) }} />
+                    <span key={event.id} className="calendar-dot" style={{ backgroundColor: getDotColor(event.event_type?.name) }} />
                   ))}
                 </div>
               </button>
@@ -316,11 +316,11 @@ function AgendaPage() {
       ) : (
         <div className="grid event-tile-grid">
           {(dayEvents.length > 0 ? dayEvents : events).map((event) => (
-            <Link key={event.id} to={`/events/${event.id}`} className="event-card" style={{borderLeft : `6px solid ${getEventStatusColor(event.EVENT_STATUS?.name)}`} }>
+            <Link key={event.id} to={`/events/${event.id}`} className="event-card" style={{borderLeft : `6px solid ${getEventStatusColor(event.event_status?.name)}`} }>
               <div className="event-card-header">
                 <div>
-                  <span className="event-type" style={{ background: getEventColor(event.EVENT_TYPE?.name) }}>
-                    {event.EVENT_TYPE?.name ?? 'Évènement'}
+                  <span className="event-type" style={{ background: getEventColor(event.event_type?.name) }}>
+                    {event.event_type?.name ?? 'Évènement'}
                   </span>
                 </div>
                 {/*{event.EVENT_STATUS?.name ? (

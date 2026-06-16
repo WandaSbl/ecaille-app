@@ -4,7 +4,7 @@ import AgendaPage from './pages/AgendaPage'
 import EventDetailPage from './pages/EventDetailPage'
 import EventFormPage from './pages/EventFormPage'
 import { useSupabaseSession } from './hooks/useSupabaseSession'
-import '../src/App.css'
+import './App.css'
 import AdminPage from './pages/Admin'
 
 function App() {

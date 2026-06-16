@@ -257,7 +257,7 @@
   color:#3f5349;
 }
 
-.event-label,
+.event-label, 
 .event-badge,
 .event-type {
   display: inline-flex;
@@ -559,6 +559,17 @@
   color: #7c3aed; /* violet comme sur ta capture */
 }
 
+.drag-handle {
+  cursor: grab;
+  padding: 6px;
+  font-size: 18px;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
 
 .sortable-song-list {
   list-style: none;
@@ -582,6 +593,7 @@
   background: #f1f5f9;
   border-radius: 6px;
   cursor: grab;
+  touch-action: none;
 }
 
 .sortable-song:active {

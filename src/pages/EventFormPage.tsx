@@ -3,10 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { Event, EventType, EventStatus } from '../types'
 import Select from 'react-select'
-import {
-  DndContext,
-  closestCenter
-} from '@dnd-kit/core'
+import {DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSensors} from '@dnd-kit/core'
 
 import {
   SortableContext,
@@ -41,23 +38,29 @@ function SortableSongItem({
       ref={setNodeRef}
       style={style}
       className="sortable-song"
-      {...attributes}
-      {...listeners}   // ✅ drag sur toute la ligne
     >
+      <span
+        className="drag-handle"
+        {...attributes}
+        {...listeners}
+      >
+        ⠿
+      </span>
+
       <span className="song-name">{song.name}</span>
 
       <button
-        type="button"
-        className="remove-song"
-        onClick={(e) => {
-          e.stopPropagation()   // ✅ empêche le drag
-          onRemove()
-        }}
-        onPointerDown={(e) => {
-          e.stopPropagation()   // ✅ empêche drag au mousedown
-        }}
-      >
-        ✕
+          type="button"
+          className="remove-song"
+          onClick={(e) => {
+            e.stopPropagation()   // ✅ empêche le drag
+            onRemove()
+          }}
+          onPointerDown={(e) => {
+            e.stopPropagation()   // ✅ empêche drag au mousedown
+          }}
+        >
+          ✕
       </button>
     </li>
   )
@@ -110,6 +113,16 @@ function EventFormPage() {
   const [checkingRights, setCheckingRights] = useState(true)
   const [allMusicians, setAllMusicians] = useState<Musician[]>([])
   const [presences, setPresences] = useState<Record<number, boolean>>({})
+  
+  const sensors = useSensors(
+    useSensor(MouseSensor),   // ✅ IMPORTANT desktop
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 5,
+      },
+    })
+  )
   
   function togglePresence(musicianId: number) {
     setPresences(prev => ({
@@ -603,6 +616,7 @@ useEffect(() => {
                   controlShouldRenderValue={false}
                   hideSelectedOptions={true}
                   closeMenuOnSelect={false}
+                  menuPortalTarget={document.body}
 
                   placeholder="Ajouter…"
 
@@ -627,6 +641,7 @@ useEffect(() => {
 
                 {setlist.songs.length > 0 && (
                   <DndContext
+                    sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={(event) => {
                       const { active, over } = event
@@ -647,6 +662,7 @@ useEffect(() => {
                         })
                       )
                     }}
+                    autoScroll={false}
                   >
                     <SortableContext
                       items={setlist.songs.map(s => s.id)}
