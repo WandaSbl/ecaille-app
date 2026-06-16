@@ -20,6 +20,55 @@ function EventDetailPage() {
   const navigate = useNavigate()
   const [isAdmin, setIsAdmin] = useState(false)
 
+  async function handleDuplicate() {
+    if (!event) return
+
+    const { data: newEvent, error } = await supabase
+      .from('EVENT')
+      .insert({
+        title: event.title + ' (copie)',
+        event_type_id: event.event_type_id,
+        event_status_id: event.event_status_id,
+        date_from: event.date_from,
+        date_to: event.date_to,
+        location: event.location,
+        dresscode: event.dresscode,
+        comment: event.comment
+      })
+      .select('id')
+      .single()
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
+    const newEventId = newEvent.id
+
+    if (event.event_songs) {
+      const rows = event.event_songs.map((item: any) => ({
+        event_id: newEventId,
+        song_id: item.song_id,
+        setlist: item.setlist,
+        position: item.position
+      }))
+
+      await supabase.from('EVENT_SONGS').insert(rows)
+    }
+
+    if (event.event_musicians) {
+      const rows = event.event_musicians.map((item: any) => ({
+        event_id: newEventId,
+        musician_id: item.musician_id,
+        is_present: item.is_present
+      }))
+
+      await supabase.from('EVENT_MUSICIANS').insert(rows)
+    }
+
+    navigate(`/events/${newEventId}/edit`)
+  }
+
   useEffect(() => {
     async function loadAdminStatus() {
       const { data: userData } = await supabase.auth.getUser()
@@ -62,32 +111,6 @@ function EventDetailPage() {
     loadEvent()
   }, [id])
 
-  const togglePresence = async (musicianId: number) => {
-    if (!event?.event_musicians) return
-    const record = event.event_musicians.find((item) => item.musician_id === musicianId)
-    if (!record) return
-
-    const updated = await supabase
-      .from('EVENT_MUSICIANS')
-      .update({ is_present: !record.is_present })
-      .eq('id', record.id)
-
-    if (updated.error) {
-      console.error(updated.error)
-      return
-    }
-
-    setEvent((current) => {
-      if (!current) return current
-      return {
-        ...current,
-        event_musicians: current.event_musicians?.map((item) =>
-          item.id === record.id ? { ...item, is_present: !record.is_present } : item,
-        )
-      }
-    })
-  }
-
   const groupedSetLists = event?.event_songs? Object.values(
       event.event_songs.reduce((acc, item) => {
         const key = item.setlist ?? 'A'
@@ -107,6 +130,11 @@ function EventDetailPage() {
     <div>
       <button className="button" type="button" onClick={() => navigate('/agenda')} style={{ marginBottom: 16 }}>
         Retour à l’agenda
+      </button>
+      <button
+        className="button"
+        onClick={() => handleDuplicate()}>
+        Dupliquer
       </button>
       {loading ? (
         <div className="card">Chargement du détail...</div>
