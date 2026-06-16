@@ -108,7 +108,7 @@ function EventFormPage() {
   const isEdit = Boolean(id)
   const [isAdmin, setIsAdmin] = useState(false)
   const [checkingRights, setCheckingRights] = useState(true)
-  const [allMusicians, setAllMusicians] = useState([])
+  const [allMusicians, setAllMusicians] = useState<Musician[]>([])
   const [presences, setPresences] = useState<Record<number, boolean>>({})
   
   function togglePresence(musicianId: number) {
@@ -124,8 +124,15 @@ function EventFormPage() {
     songs: {
       id: number;
       name: string;
+      duration: number;
     }[];
   };
+  
+  type Musician = {
+    id: number
+    name: string
+    instrument?: string
+  }
 
   const [setLists, setSetLists] = useState<SetList[]>([]);
 
@@ -236,7 +243,7 @@ useEffect(() => {
       setEvent(data)
 
       if (data.EVENT_SONGS) {
-        const grouped = data.EVENT_SONGS.reduce((acc, item) => {
+        const grouped = data.EVENT_SONGS.reduce((acc: Record<string, any>, item: any) => {
           const key = item.setlist ?? 'A'
 
           if (!acc[key]) {
@@ -266,9 +273,9 @@ useEffect(() => {
       }
 
       if (data.EVENT_MUSICIANS) {
-        const presenceMap = {}
+        const presenceMap: Record<number, boolean> = {}
 
-        data.EVENT_MUSICIANS.forEach(item => {
+        data.EVENT_MUSICIANS.forEach((item: any)=> {
           presenceMap[item.musician_id] = item.is_present
         })
         setPresences(presenceMap)

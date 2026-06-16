@@ -88,8 +88,8 @@ function EventDetailPage() {
     })
   }
 
-  const groupedSetLists = event?.EVENT_SONGS? Object.values(
-      event.EVENT_SONGS.reduce((acc, item) => {
+  const groupedSetLists = event?.event_songs? Object.values(
+      event.event_songs.reduce((acc, item) => {
         const key = item.setlist ?? 'A'
         if (!acc[key]) acc[key] = []
 
@@ -212,23 +212,23 @@ function EventDetailPage() {
         <div className="card" style={{ marginTop: 18 }}>
             <h3>Musiciens</h3>
 
-            {event.EVENT_MUSICIANS?.length ? (
+            {event.event_musicians?.length ? (
               <>
               <h4>✅ Présents</h4>
               <ul className="musicians-list columns">
-                {event.EVENT_MUSICIANS
+                {event.event_musicians
                   .filter(item => item.is_present)
                   .map(item => (
-                    <li key={item.id}>{item.MUSICIANS?.name}</li>
+                    <li key={item.id}>{item.musician?.name}</li>
                   ))}
               </ul>
 
               <h4>❌ Absents</h4>
               <ul className="musicians-list columns">
-                {event.EVENT_MUSICIANS
+                {event.event_musicians
                   .filter(item => item.is_present === false)
                   .map(item => (
-                    <li key={item.id}>{item.MUSICIANS?.name}</li>
+                    <li key={item.id}>{item.musician?.name}</li>
                   ))}
               </ul>
               </>
