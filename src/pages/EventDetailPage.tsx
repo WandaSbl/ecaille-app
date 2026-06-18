@@ -131,11 +131,6 @@ function EventDetailPage() {
       <button className="button" type="button" onClick={() => navigate('/agenda')} style={{ marginBottom: 16 }}>
         Retour à l’agenda
       </button>
-      <button
-        className="button"
-        onClick={() => handleDuplicate()}>
-        Dupliquer
-      </button>
       {loading ? (
         <div className="card">Chargement du détail...</div>
       ) : event ? (
@@ -157,13 +152,20 @@ function EventDetailPage() {
 
               <div style={{ textAlign: 'right', display: 'flex', gap: 8 }}>
                 {isAdmin && (
-                  <button
-                    className="button button-secondary"
-                    type="button"
-                    onClick={() => navigate(`/events/${event.id}/edit`)}
-                  >
-                    Modifier
-                  </button>
+                  <div>
+                    <button
+                      className="button button-secondary"
+                      type="button"
+                      onClick={() => navigate(`/events/${event.id}/edit`)}
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      className="button button-secondary"
+                      onClick={() => handleDuplicate()}>
+                      Dupliquer
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

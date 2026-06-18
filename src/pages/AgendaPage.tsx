@@ -16,12 +16,6 @@ const EVENT_BACKGROUND: Record<string, string> = {
   'Atelier': 'linear-gradient(135deg, #ed9c63 0%, #0ea5e9 100%)'
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  'En attente orga': '#b1a9b8',
-  'En attente musiciens': '#b1a9b8',
-  'Confirmé': '#007400'
-}
-
 function formatDayKey(date: Date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -60,6 +54,7 @@ function AgendaPage() {
   const eventsSectionRef = useRef<HTMLDivElement>(null)
   const [attendances, setAttendances] = useState<Record<string, boolean>>({})
   const { isAdmin, loading:adminLoading } = useAdmin()
+  const [activeFilters, setActiveFilters] = useState<string[]>([])
 
   useEffect(() => {
     const updateOnlineStatus = () => setOffline(!navigator.onLine)
@@ -210,6 +205,14 @@ function AgendaPage() {
     if (error) console.error(error)
   }
 
+function toggleFilter(type: string) {
+  setActiveFilters(prev =>
+    prev.includes(type)
+      ? prev.filter(t => t !== type)  // enlever
+      : [...prev, type]               // ajouter
+  )
+}
+
 
   return (
     <div>
@@ -220,9 +223,6 @@ function AgendaPage() {
       )}
 
       <div className="list-header">
-        <div>
-          <h2>Agenda général</h2>
-        </div>
         <div>
           {!adminLoading && isAdmin && (<button className="button button-primary" onClick={() => navigate('/events/new')}>
             Ajouter un événement
@@ -316,18 +316,13 @@ function AgendaPage() {
       ) : (
         <div className="grid event-tile-grid">
           {(dayEvents.length > 0 ? dayEvents : events).map((event) => (
-            <Link key={event.id} to={`/events/${event.id}`} className="event-card" style={{borderLeft : `6px solid ${getEventStatusColor(event.event_status?.name)}`} }>
+            <Link key={event.id} to={`/events/${event.id}`} className="event-card" style={{borderBottom : `12px solid ${getEventStatusColor(event.event_status?.name)}`} }>
               <div className="event-card-header">
                 <div>
                   <span className="event-type" style={{ background: getEventColor(event.event_type?.name) }}>
                     {event.event_type?.name ?? 'Évènement'}
                   </span>
                 </div>
-                {/*{event.EVENT_STATUS?.name ? (
-                  <span className="event-badge" style={{ backgroundColor: event.EVENT_STATUS?.color ?? '#64748b' }}>
-                    {event.EVENT_STATUS.name}
-                  </span>
-                ) : null}*/}
               </div>
               <h3>{event.title}</h3>
               <p className="event-meta">

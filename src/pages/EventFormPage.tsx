@@ -112,7 +112,7 @@ function EventFormPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [checkingRights, setCheckingRights] = useState(true)
   const [allMusicians, setAllMusicians] = useState<Musician[]>([])
-  const [presences, setPresences] = useState<Record<number, boolean>>({})
+  const [presences, setPresences] = useState<Record<number, boolean | undefined>>({})
   
   const sensors = useSensors(
     useSensor(MouseSensor),   // ✅ IMPORTANT desktop
@@ -123,13 +123,31 @@ function EventFormPage() {
       },
     })
   )
+
+function getNextPresenceState(
+  current: boolean | undefined
+  ): boolean {
+    if (current === undefined) return true  
+    return false                             
+}
   
-  function togglePresence(musicianId: number) {
-    setPresences(prev => ({
+function togglePresence(musicianId: number) {
+  setPresences(prev => {
+    const current = prev[musicianId]
+
+    if (current !== undefined) {
+      return {
+        ...prev,
+        [musicianId]: !current
+      }
+    }
+
+    return {
       ...prev,
-      [musicianId]: !prev[musicianId]
-    }))
-  }
+      [musicianId]: true
+    }
+  })
+}
 
   type SetList = {
     id: string;          // uuid local
@@ -702,22 +720,30 @@ useEffect(() => {
           <ul className="musicians-list columns">
             {allMusicians.map(musician => {
               const present = presences[musician.id] ?? false
-
+              const state = presences[musician.id]
               return (
                 <li
                   key={musician.id}
                   onClick={() => togglePresence(musician.id)}
                   style={{
                     cursor: 'pointer',
-                    background: present ? '#dcfce7' : '#fee2e2',
                     padding: 8,
-                    borderRadius: 6
+                    borderRadius: 6,
+                    background:
+                      state === true
+                        ? '#dcfce7'   // ✅ présent
+                        : state === false
+                        ? '#fee2e2'   // ❌ absent
+                        : '#e5e7eb'   // ⏳ sans réponse
                   }}
                 >
-                  {present ? '✅' : '❌'} {musician.name }
-                    <span style={{ color: '#64748b', marginLeft: 8 }}>
-                      ({musician.instrument})
-                    </span>
+                  {state === true && '✅ '}
+                  {state === false && '❌ '}
+                  {state === undefined && '⏳ '}
+                  {musician.name}
+                  <span style={{ marginLeft: 8, color: '#64748b' }}>
+                    ({musician.instrument})
+                  </span>
                 </li>
               )
             })}
