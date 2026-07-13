@@ -156,8 +156,7 @@ function EventDetailPage() {
                     <button
                       className="button button-secondary"
                       type="button"
-                      onClick={() => navigate(`/events/${event.id}/edit`)}
-                    >
+                      onClick={() => navigate(`/events/${event.id}/edit`)}>
                       Modifier
                     </button>
                     <button

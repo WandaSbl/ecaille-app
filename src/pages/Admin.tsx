@@ -24,6 +24,8 @@ function AdminPage() {
 
   const [loading, setLoading] = useState(false)
 
+  const [editingDurations, setEditingDurations] = useState<Record<number, string>>({})
+
   // ========================
   // LOAD DATA
   // ========================
@@ -121,21 +123,32 @@ function AdminPage() {
                     />
 
                     <input
-                        className="song-duration-input"
-                        value={formatDuration(song.duration)}
-                        onChange={(e) => {
-                            const val = e.target.value
+                      className="song-duration-input"
+                      value={
+                        editingDurations[song.id] ??
+                        formatDuration(song.duration)
+                      }
+                      onChange={(e) =>
+                        setEditingDurations(prev => ({
+                          ...prev,
+                          [song.id]: e.target.value
+                        }))
+                      }
+                      onBlur={() => {
+                        const value =
+                          editingDurations[song.id] ??
+                          formatDuration(song.duration)
 
-                            // ✅ autorise uniquement pattern mm:ss
-                            if (!/^\d{0,2}:?\d{0,2}$/.test(val) && val !== '') return
+                        updateSong(
+                          song.id,
+                          'duration',
+                          parseDuration(value)
+                        )
 
-                            // ✅ si format complet mm:ss
-                            if (val.includes(':')) {
-                            const seconds = parseDuration(val)
-                            updateSong(song.id, 'duration', seconds)
-                            }
-                        }}
+                        loadSongs()
+                      }}
                     />
+
                     <button
                         className="delete-button"
                         onClick={() => deleteSong(song.id)}

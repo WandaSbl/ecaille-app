@@ -124,12 +124,22 @@ function EventFormPage() {
     })
   )
 
-function getNextPresenceState(
-  current: boolean | undefined
-  ): boolean {
-    if (current === undefined) return true  
-    return false                             
-}
+  function generateTimeOptions() {
+    const times: string[] = []
+
+    for (let h = 0; h < 24; h++) {
+      for (let m = 0; m < 60; m += 15) {
+        times.push(
+          `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+        )
+      }
+    }
+
+    return times
+  }
+
+  const TIME_OPTIONS = generateTimeOptions()
+
   
 function togglePresence(musicianId: number) {
   setPresences(prev => {
@@ -226,7 +236,7 @@ function togglePresence(musicianId: number) {
   )
 
   useEffect(() => {
-      supabase.from('SONGS').select('id, name, duration').then(({ data }) => {
+      supabase.from('SONGS').select('id, name, duration').order('name', { ascending: true }).then(({ data }) => {
         if (data) {
           setSongs(data.map(s => ({ value: s.id, label: s.name, duration: s.duration })));
         }
@@ -516,6 +526,25 @@ useEffect(() => {
     )
   }
 
+  
+function addHours(dateTime: string, hours: number): string {
+  const date = new Date(dateTime)
+  date.setHours(date.getHours() + hours)
+
+  const pad = (n: number) => n.toString().padStart(2, '0')
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+function handleDateFromChange(value: string) {
+  setEvent(prev => ({
+    ...prev,
+    date_from: value,
+    date_to: addHours(value, 2)
+  }))
+}
+
+
   return (
     <div className="card">
       <button className="button" type="button" onClick={() => navigate('/agenda')} style={{ marginBottom: 16 }}>
@@ -551,19 +580,23 @@ useEffect(() => {
             <option key={status.id} value={status.id}>{status.name}</option>
           ))}
         </select>
+        
         <input
           className="input"
           type="datetime-local"
+          step={900}
           value={event.date_from ?? ''}
-          onChange={(e) => handleChange('date_from', e.target.value)}
+          onChange={(e) => handleDateFromChange(e.target.value)}
           required
         />
         <input
           className="input"
           type="datetime-local"
+          step={900}
           value={event.date_to ?? ''}
           onChange={(e) => handleChange('date_to', e.target.value)}
         />
+        
         <input
           className="input"
           value={event.location ?? ''}

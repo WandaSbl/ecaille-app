@@ -49,12 +49,16 @@ function AgendaPage() {
     const now = new Date()
     return new Date(now.getFullYear(), now.getMonth(), 1)
   })
-  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const navigate = useNavigate()
   const eventsSectionRef = useRef<HTMLDivElement>(null)
   const [attendances, setAttendances] = useState<Record<string, boolean>>({})
   const { isAdmin, loading:adminLoading } = useAdmin()
   const [activeFilters, setActiveFilters] = useState<string[]>([])
+  const [showPast, setShowPast] = useState(false)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayKey = formatDayKey(new Date())
 
   useEffect(() => {
     const updateOnlineStatus = () => setOffline(!navigator.onLine)
@@ -124,8 +128,9 @@ function AgendaPage() {
 
   const monthDays = useMemo(() => getMonthDays(currentMonth.getFullYear(), currentMonth.getMonth()), [currentMonth])
 
-  const selectedKey = formatDayKey(selectedDate)
-  const dayEvents = eventMap[selectedKey] ?? []
+  const selectedKey = selectedDate ? formatDayKey(selectedDate) : null
+ 
+  const dayEvents = selectedKey ? eventMap[selectedKey] ?? [] : []
 
   const hasEvents = (date: Date) => {
     const dayKey = formatDayKey(date)
@@ -141,7 +146,6 @@ function AgendaPage() {
     if (!eventName) return '#94a3b8'
     return EVENT_BACKGROUND[eventName] ?? '#94a3b8'
   }
-  
 
   const getEventStatusColor = (statusName?: string) => {
     if (statusName == "Confirmé") return '#20c26d';
@@ -179,6 +183,9 @@ function AgendaPage() {
     return musician
   }
 
+  function isConfirmed(event: Event) {
+  return event.event_status?.name === 'Confirmé'
+  }
   
   function getNextState(current?: boolean) {
     if (current === undefined) return true   // 1er clic → présent
@@ -213,6 +220,26 @@ function toggleFilter(type: string) {
   )
 }
 
+const upcomingEvents = useMemo(() => {
+  return events.filter(event => {
+    const eventDayKey = formatDayKey(new Date(event.date_from))
+    return eventDayKey >= todayKey
+  })
+}, [events, todayKey])
+
+const eventsToShow = showPast ? events : upcomingEvents
+
+const eventsForDisplayedMonth = useMemo(() => {
+  const firstDayOfDisplayedMonth = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth(),
+    1
+  )
+
+  return eventsToShow.filter(event =>
+    new Date(event.date_from) >= firstDayOfDisplayedMonth
+  )
+}, [eventsToShow, currentMonth])
 
   return (
     <div>
@@ -245,13 +272,25 @@ function toggleFilter(type: string) {
 
       <div className="calendar-panel">
         <div className="calendar-header">
-          <button className="calendar-nav" type="button" onClick={() => setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))}>
+          <button className="calendar-nav" type="button" onClick={() => {
+              setCurrentMonth(prev =>
+                new Date(prev.getFullYear(), prev.getMonth() - 1, 1)
+              )
+
+              setSelectedDate(null)
+          }}>
             ‹
           </button>
           <div className="calendar-title">
             {currentMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
           </div>
-          <button className="calendar-nav" type="button" onClick={() => setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))}>
+          <button className="calendar-nav" type="button" onClick={() => {
+            setCurrentMonth(prev =>
+              new Date(prev.getFullYear(), prev.getMonth() + 1, 1)
+            )
+
+            setSelectedDate(null)
+          }}>
             ›
           </button>
         </div>
@@ -270,14 +309,30 @@ function toggleFilter(type: string) {
               <button
                 key={day.toISOString()}
                 type="button"
-                className={`calendar-day ${isCurrentMonth ? '' : 'calendar-day--muted'} ${isSelected ? 'calendar-day--selected' : ''} ${hasEvents(day) ? 'calendar-day--clickable' : ''}`}
+                className={`
+                  calendar-day
+                  ${isCurrentMonth ? '' : 'calendar-day--muted'}
+                  ${isSelected ? 'calendar-day--selected' : ''}
+                  ${isToday ? 'calendar-day--today' : ''}
+                  ${hasEvents(day) ? 'calendar-day--clickable' : ''}
+                `}
                 onClick={() => handleDayClick(day)}
               >
                 <span className="calendar-day-number">{day.getDate()}</span>
                 {isToday ? <span className="calendar-day-today"></span> : null}
                 <div className="calendar-dots">
                   {eventsForDay.slice(0, 3).map((event) => (
-                    <span key={event.id} className="calendar-dot" style={{ backgroundColor: getDotColor(event.event_type?.name) }} />
+                    <span
+                      key={event.id}
+                      className={`calendar-dot ${
+                        isConfirmed(event)
+                          ? 'calendar-dot--confirmed'
+                          : 'calendar-dot--pending'
+                      }`}
+                      style={{
+                        '--event-color': getDotColor(event.event_type?.name)
+                      } as React.CSSProperties}
+                    />
                   ))}
                 </div>
               </button>
@@ -303,20 +358,50 @@ function toggleFilter(type: string) {
 
       <div className="day-summary" ref={eventsSectionRef}>
         <div className="day-summary-title">
-          <h3>{selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
+          <h3>
+            {selectedDate
+              ? selectedDate.toLocaleDateString('fr-FR', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long'
+                })
+              : currentMonth.toLocaleDateString('fr-FR', {
+                  month: 'long',
+                  year: 'numeric'
+                })}
+          </h3>
           <span>{dayEvents.length} événement{dayEvents.length > 1 ? 's' : ''}</span>
         </div>
         {dayEvents.length === 0 ? (
-          <div className="card card-muted">Aucun événement pour cette journée.</div>
+          <span>Aucun événement pour cette journée.</span>
         ) : null}
+        <div className="agenda-toggle">
+          <span className="agenda-toggle-label">
+            Événements passés
+          </span>
+
+          <button
+            type="button"
+            className={`toggle-switch ${showPast ? 'toggle-switch--on' : ''}`}
+            onClick={() => setShowPast(prev => !prev)}
+            aria-pressed={showPast}
+          >
+            <span className="toggle-thumb" />
+          </button>
+        </div>
       </div>
 
       {loading ? (
         <div className="card">Chargement des événements...</div>
       ) : (
         <div className="grid event-tile-grid">
-          {(dayEvents.length > 0 ? dayEvents : events).map((event) => (
-            <Link key={event.id} to={`/events/${event.id}`} className="event-card" style={{borderBottom : `12px solid ${getEventStatusColor(event.event_status?.name)}`} }>
+          {(dayEvents.length > 0
+            ? dayEvents
+            : currentMonth.getFullYear() === today.getFullYear() &&
+              currentMonth.getMonth() === today.getMonth()
+                ? upcomingEvents
+                : eventsForDisplayedMonth).map((event) => (
+            <Link key={event.id} to={`/events/${event.id}`} className="event-card" style={{borderBottom : `10px solid ${getEventStatusColor(event.event_status?.name)}`} }>
               <div className="event-card-header">
                 <div>
                   <span className="event-type" style={{ background: getEventColor(event.event_type?.name) }}>
