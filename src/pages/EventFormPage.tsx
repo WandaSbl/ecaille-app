@@ -547,7 +547,7 @@ function handleDateFromChange(value: string) {
 
   return (
     <div className="card">
-      <button className="button" type="button" onClick={() => navigate('/agenda')} style={{ marginBottom: 16 }}>
+      <button className="button" type="button" onClick={() => navigate(-1)} style={{ marginBottom: 16 }}>
         Retour à l’agenda
       </button>
       <h2>{isEdit ? 'Modifier un événement' : 'Ajouter un événement'}</h2>

@@ -116,15 +116,48 @@ function AgendaPage() {
 
   }, [])
 
-  const eventMap = useMemo(() => {
-    const map: Record<string, Event[]> = {}
-    events.forEach((event) => {
-      const key = formatDayKey(new Date(event.date_from))
-      if (!map[key]) map[key] = []
-      map[key].push(event)
-    })
-    return map
+  useEffect(() => {
+    const savedMonth =
+      sessionStorage.getItem('agenda-current-month')
+
+    const savedDate =
+      sessionStorage.getItem('agenda-selected-date')
+
+    if (savedMonth) {
+      setCurrentMonth(new Date(savedMonth))
+    }
+
+    if (savedDate) {
+      setSelectedDate(new Date(savedDate))
+    }
+  }, [])
+
+  useEffect(() => {
+    const savedScroll =
+      sessionStorage.getItem('agenda-scroll')
+
+    if (!savedScroll) return
+
+    setTimeout(() => {
+      window.scrollTo({
+        top: Number(savedScroll)
+      })
+    }, 100)
   }, [events])
+
+const eventMap = useMemo(() => {
+  const map: Record<string, Event[]> = {}
+
+  events.forEach((event) => {
+    const key = formatDayKey(new Date(event.date_from))
+
+    if (!map[key]) map[key] = []
+
+    map[key].push(event)
+  })
+
+  return map
+}, [events])
 
   const monthDays = useMemo(() => getMonthDays(currentMonth.getFullYear(), currentMonth.getMonth()), [currentMonth])
 
@@ -321,7 +354,10 @@ const eventsForDisplayedMonth = useMemo(() => {
                 <span className="calendar-day-number">{day.getDate()}</span>
                 {isToday ? <span className="calendar-day-today"></span> : null}
                 <div className="calendar-dots">
-                  {eventsForDay.slice(0, 3).map((event) => (
+                {eventsForDay
+                  .filter(event => event.event_status?.name !== 'Annulé')
+                  .slice(0, 3)
+                  .map((event) => (
                     <span
                       key={event.id}
                       className={`calendar-dot ${
@@ -334,7 +370,7 @@ const eventsForDisplayedMonth = useMemo(() => {
                       } as React.CSSProperties}
                     />
                   ))}
-                </div>
+              </div>
               </button>
             )
           })}
@@ -401,7 +437,30 @@ const eventsForDisplayedMonth = useMemo(() => {
               currentMonth.getMonth() === today.getMonth()
                 ? upcomingEvents
                 : eventsForDisplayedMonth).map((event) => (
-            <Link key={event.id} to={`/events/${event.id}`} className="event-card" style={{borderBottom : `10px solid ${getEventStatusColor(event.event_status?.name)}`} }>
+            <Link key={event.id} 
+                  to={`/events/${event.id}`} 
+                  className={`event-card ${event.event_status?.name === 'Annulé' ? 'event-card--cancelled' : ''}`} 
+                  style={{borderBottom : `10px solid ${getEventStatusColor(event.event_status?.name)}`} }
+                  onClick={() => {
+                    sessionStorage.setItem(
+                      'agenda-current-month',
+                      currentMonth.toISOString()
+                    )
+
+                    if (selectedDate) {
+                      sessionStorage.setItem(
+                        'agenda-selected-date',
+                        selectedDate.toISOString()
+                      )
+                    }
+
+                    sessionStorage.setItem(
+                      'agenda-scroll',
+                      window.scrollY.toString()
+                    )
+                  }}
+
+                  >
               <div className="event-card-header">
                 <div>
                   <span className="event-type" style={{ background: getEventColor(event.event_type?.name) }}>
@@ -410,6 +469,11 @@ const eventsForDisplayedMonth = useMemo(() => {
                 </div>
               </div>
               <h3>{event.title}</h3>
+              {event.event_status?.name === 'Annulé' && (
+                <span className="cancelled-badge">
+                  ANNULÉ
+                </span>
+              )}
               <p className="event-meta">
                 {new Date(event.date_from).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}
                 {event.location ? ` · ${event.location}` : ''}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { Event } from '../types'
+import { Printer } from 'lucide-react'
 
 function formatDuration(seconds: number): string {
   const minutes = Math.floor(seconds / 60)
@@ -126,9 +127,88 @@ function EventDetailPage() {
     (a, b) => a[0].setlist.localeCompare(b[0].setlist)
   )
 
+  function printSetlists() {
+    if (!sortedSetLists.length) return
+
+    const html = `
+      <html>
+        <head>
+          <title>Setlists ${event?.title}</title>
+
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 20px;
+            }
+
+            .setlist {
+              page-break-after: always;
+            }
+
+            .setlist:last-child {
+              page-break-after: auto;
+            }
+
+            h1 {
+              font-size: 28px;
+              margin-bottom: 8px;
+            }
+
+            h2 {
+              margin-bottom: 20px;
+            }
+
+            li {
+              font-size: 40px;
+              margin-bottom: 8px;
+            }
+          </style>
+        </head>
+
+        <body>
+          ${sortedSetLists
+            .map((setlistSongs) => {
+              const setlistName = setlistSongs[0].setlist
+
+              const orderedSongs = [...setlistSongs].sort(
+                (a, b) => a.position - b.position
+              )
+
+              return `
+                <div class="setlist">
+                  <h1>${event?.title ?? ''}</h1>
+                  <h2>Setlist ${setlistName}</h2>
+
+                  <ol>
+                    ${orderedSongs
+                      .map(
+                        (song) =>
+                          `<li>${song.songs?.name ?? song.SONGS?.name ?? ''}</li>`
+                      )
+                      .join('')}
+                  </ol>
+                </div>
+              `
+            })
+            .join('')}
+        </body>
+      </html>
+    `
+
+    const printWindow = window.open('', '_blank')
+
+    if (!printWindow) return
+
+    printWindow.document.write(html)
+    printWindow.document.close()
+
+    printWindow.focus()
+    printWindow.print()
+  }
+
   return (
     <div>
-      <button className="button" type="button" onClick={() => navigate('/agenda')} style={{ marginBottom: 16 }}>
+      <button className="button" type="button" onClick={() => navigate(-1)} style={{ marginBottom: 16 }}>
         Retour à l’agenda
       </button>
       {loading ? (
@@ -191,7 +271,17 @@ function EventDetailPage() {
             {event.comment ? <p><strong>Commentaire :</strong> {event.comment}</p> : null}
           </div>
             <div className="card" style={{ marginTop: 18 }}>
-            <h3>Setlists</h3>
+            <div className="setlists-header">
+              <h3>Setlists</h3>
+              <button
+                type="button"
+                className="icon-button"
+                onClick={printSetlists}
+                title="Imprimer les setlists"
+              >
+                <Printer size={20} />
+              </button>
+            </div>
             <div className="setlists-grid">
               {sortedSetLists.length > 0 ? (
                   sortedSetLists.map((setlistSongs) => {

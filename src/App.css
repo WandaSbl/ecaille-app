@@ -509,6 +509,31 @@
   color:#18B5A0;
 }
 
+.setlists-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.setlists-header h3 {
+  margin: 0;
+}
+
+.icon-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.4rem;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.icon-button:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
 .setlists-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -526,6 +551,24 @@
   font-size: 13px;
   color: #64748b;
   font-weight: normal;
+}
+
+.cancelled-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.event-card--cancelled {
+  opacity: 0.5;
+}
+
+.event-card--cancelled h3 {
+  text-decoration: line-through;
 }
 
 .event-card:hover {
