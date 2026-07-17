@@ -9,6 +9,54 @@ function LoginPage() {
   const [message, setMessage] = useState<string | null>(null)
   const navigate = useNavigate()
 
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+    const base64 = (base64String + padding)
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+
+    const rawData = window.atob(base64)
+
+    return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)))
+  }
+
+  async function registerPushNotifications() {
+    const { data: userData } = await supabase.auth.getUser()
+
+    if (!userData.user) return
+
+    const { data: musician } = await supabase
+      .from('MUSICIANS')
+      .select('id')
+      .eq('user_id', userData.user.id)
+      .single()
+
+    if (!musician) return
+
+    const registration = await navigator.serviceWorker.ready
+
+    const subscription =
+      await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(
+          import.meta.env.VITE_VAPID_PUBLIC_KEY
+        )
+      })
+
+    const { data, error } = await supabase
+        .from('PUSH_SUBSCRIPTIONS')
+        .upsert(
+          {
+            musician_id: musician.id,
+            subscription
+          },
+          {
+            onConflict: 'musician_id'
+          }
+        )
+
+  }
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     setMessage('')
@@ -28,6 +76,31 @@ function LoginPage() {
       setMessage(error.message)
       return
     }
+
+    const permission = await Notification.requestPermission()
+
+    if (permission === 'granted') {
+      try {
+        await registerPushNotifications()
+      } catch (error) {
+        console.error(
+          'Erreur inscription notifications',
+          error
+        )
+      }
+    }
+
+    const { data } = await supabase.functions.invoke('send-test-notification')
+    
+    console.log(data)
+
+    setTimeout(() => {
+      navigator.serviceWorker.ready.then(reg =>
+        reg.getNotifications().then(notifs =>
+          console.log('Notifications', notifs)
+        )
+      )
+    }, 2000)
 
     navigate('/agenda')
   }
