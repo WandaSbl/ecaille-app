@@ -9,6 +9,8 @@ function LoginPage() {
   const [message, setMessage] = useState<string | null>(null)
   const navigate = useNavigate()
 
+  console.log('VAPID KEY =',import.meta.env.VITE_VAPID_PUBLIC_KEY)
+
   function urlBase64ToUint8Array(base64String: string) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
     const base64 = (base64String + padding)
@@ -21,6 +23,7 @@ function LoginPage() {
   }
 
   async function registerPushNotifications() {
+    console.log('Registering push notifications...');
     const { data: userData } = await supabase.auth.getUser()
 
     if (!userData.user) return
@@ -33,15 +36,29 @@ function LoginPage() {
 
     if (!musician) return
 
+    console.log('Avant ready')
+
     const registration = await navigator.serviceWorker.ready
 
-    const subscription =
-      await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          import.meta.env.VITE_VAPID_PUBLIC_KEY
-        )
-      })
+    console.log('Après ready')
+
+    console.log('SW ready', registration)
+    console.log('Avant subscribe')
+
+    let subscription =
+      await registration.pushManager.getSubscription()
+    
+    console.log('Subscription existante', subscription)
+
+    if (!subscription) {
+      subscription =
+        await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(
+            import.meta.env.VITE_VAPID_PUBLIC_KEY
+          )
+        })
+    }
 
     const { data, error } = await supabase
         .from('PUSH_SUBSCRIPTIONS')
