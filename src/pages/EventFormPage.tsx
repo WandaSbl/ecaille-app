@@ -200,20 +200,15 @@ function togglePresence(musicianId: number) {
 
   useEffect(() => {
     async function loadMetadata() {
-      console.log('Chargement des métadonnées...')
       const [typeResult, statusResult] = await Promise.all([
         supabase.from('EVENT_TYPE').select('*'),
         supabase.from('EVENT_STATUS').select('*')
       ])
       
-      console.log('typeResult:', typeResult)
-      console.log('statusResult:', statusResult)
-      
       if (typeResult.error) {
         console.error('Erreur event_type:', typeResult.error)
         setError(`Erreur types: ${typeResult.error.message}`)
       } else {
-        console.log('Types chargés:', typeResult.data)
         setTypes(typeResult.data ?? [])
         setError(`Types: ${typeResult.data?.length ?? 0} lignes reçues`)
       }
@@ -222,7 +217,6 @@ function togglePresence(musicianId: number) {
         console.error('Erreur event_status:', statusResult.error)
         setError(prev => `${prev}; Erreur statuts: ${statusResult.error.message}`)
       } else {
-        console.log('Statuts chargés:', statusResult.data)
         setStatuses(statusResult.data ?? [])
       }
     }
@@ -433,6 +427,16 @@ useEffect(() => {
         }
       }
 
+      console.log(`Événement ${eventId} mis à jour avec succès.`)
+      await supabase.functions.invoke('send-push-notification',
+        {
+          body: {
+            title: '📅 Événement modifié',
+            body: `${event.title}`
+          }
+        }
+      )
+
       navigate(`/events/${eventId}`)
     }
 
@@ -473,6 +477,17 @@ useEffect(() => {
           return
         }
       }
+
+      console.log(`Événement ${eventId} créé avec succès.`)
+      await supabase.functions.invoke('send-push-notification',
+        {
+          body: {
+            title: '📅 Nouvel événement',
+            body: `${event.title}`
+          }
+        }
+      )
+
       navigate(`/events/${eventId}`)
     }
 
