@@ -113,6 +113,7 @@ function EventFormPage() {
   const [checkingRights, setCheckingRights] = useState(true)
   const [allMusicians, setAllMusicians] = useState<Musician[]>([])
   const [presences, setPresences] = useState<Record<number, boolean | undefined>>({})
+  const [linkEvent, setLinkEvent] = useState<string | null>(null)
   
   const sensors = useSensors(
     useSensor(MouseSensor),   // ✅ IMPORTANT desktop
@@ -137,8 +138,6 @@ function EventFormPage() {
 
     return times
   }
-
-  const TIME_OPTIONS = generateTimeOptions()
 
   
 function togglePresence(musicianId: number) {
@@ -336,6 +335,7 @@ useEffect(() => {
       title: event.title,
       event_type_id: Number(event.event_type_id),
       event_status_id: event.event_status_id ? Number(event.event_status_id) : undefined,
+      linked_event_id: event.linked_event_id ? Number(event.linked_event_id) : undefined,
       date_from: event.date_from,
       date_to: event.date_to,
       location: event.location,
@@ -562,7 +562,7 @@ function handleDateFromChange(value: string) {
 
   return (
     <div className="card">
-      <button className="button" type="button" onClick={() => navigate(-1)} style={{ marginBottom: 16 }}>
+      <button className="button" type="button" onClick={() => navigate('/agenda')} style={{ marginBottom: 16 }}>
         Retour à l’agenda
       </button>
       <h2>{isEdit ? 'Modifier un événement' : 'Ajouter un événement'}</h2>
@@ -585,6 +585,19 @@ function handleDateFromChange(value: string) {
             <option key={type.id} value={type.id}>{type.name}</option>
           ))}
         </select>
+
+        {linkEvent && (<select
+          className="select"
+          value={event.linked_event_id ?? ''}
+          onChange={(e) => handleChange('linked_event_id', e.target.value)}
+          required
+        >
+          <option value="">Type d’événement</option>
+          {types.map((type) => (
+            <option key={type.id} value={type.id}>{type.name}</option>
+          ))}
+        </select>)}
+
         <select
           className="select"
           value={event.event_status_id ?? ''}
@@ -798,9 +811,19 @@ function handleDateFromChange(value: string) {
           </ul>
         </div>
 
-        <button className="button" type="submit" disabled={loading}>
-          {loading ? 'Enregistrement...' : isEdit ? 'Mettre à jour' : 'Créer l’événement'}
-        </button>
+        <div className="sticky-submit">
+          <button
+            className="button"
+            type="submit"
+            disabled={loading}
+          >
+            {loading
+              ? 'Enregistrement...'
+              : isEdit
+                ? 'Mettre à jour'
+                : 'Créer l’événement'}
+          </button>
+        </div>
       </form>
     </div>
   )

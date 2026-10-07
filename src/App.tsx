@@ -1,4 +1,4 @@
-import { Route, Routes, Navigate } from 'react-router-dom'
+import { Route, Routes, Navigate, useLocation } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
 import AgendaPage from './pages/AgendaPage'
 import EventDetailPage from './pages/EventDetailPage'
@@ -9,6 +9,8 @@ import AdminPage from './pages/Admin'
 
 function App() {
   const { session, loading } = useSupabaseSession()
+  const location = useLocation()
+  const showHeader = location.pathname !== '/login'
 
   if (loading) {
     return <div className="app-shell">Chargement...</div>
@@ -16,9 +18,11 @@ function App() {
 
   return (
     <div className="app-shell">
-      <header className="app-header">
-        <h1>Écaille</h1>
-      </header>
+      {showHeader && (
+        <header className="app-header">
+          <h1>Écaille</h1>
+        </header>
+      )}
 
       <Routes>
         <Route path="/login" element={<LoginPage />} />

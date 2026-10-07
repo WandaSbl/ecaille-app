@@ -42,6 +42,7 @@ export type EventMusician = {
 export type Event = {
   id: number
   event_type_id: number
+  linked_event_id: number | null
   title: string
   date_from: string
   date_to: string | null

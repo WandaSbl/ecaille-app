@@ -42,10 +42,10 @@
   margin: 0;
   background: linear-gradient(
     90deg,
-    #20C168,
     #0EA5E9,
-    #18B5A0,
-    #DE9151,
+    #20C168,
+    #20d6be,
+    #da7c30,
     #F34213
   );
   -webkit-background-clip: text;
@@ -170,10 +170,10 @@
   margin: 0;
   background: linear-gradient(
     90deg,
-    #20C168,
     #0EA5E9,
-    #18B5A0,
-    #DE9151,
+    #20C168,
+    #20d6be,
+    #da7c30,
     #F34213
   );
   -webkit-background-clip: text;
@@ -209,13 +209,13 @@
   justify-content: center;
   border: none;
   border-radius: 999px;
-  padding: 12px 18px;
+  padding: 6px 6px;
   background: linear-gradient(135deg, #22c55e 0%, #0ea5e9 100%);
   color: white;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
-  margin: 10px;
+  margin: 5px;
 }
 
 .button:hover {
@@ -818,4 +818,16 @@
   .calendar-day {
     min-height: 80px;
   }
+}
+
+.sticky-submit {
+  position: sticky;
+  bottom: 0;
+  padding: 12px 0;
+  backdrop-filter: blur(8px);
+  z-index: 100;
+}
+
+.sticky-submit .button {
+  width: 100%;
 }

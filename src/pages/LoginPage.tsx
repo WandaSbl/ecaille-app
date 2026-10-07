@@ -5,7 +5,8 @@ import { supabase } from '../lib/supabaseClient'
 function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [mode, setMode] = useState<'login' | 'signup'>('login')
+  const [newPassword, setNewPassword] = useState('')
+  const [mode, setMode] = useState<'login' | 'modifyMdp'>('login')
   const [message, setMessage] = useState<string | null>(null)
   const navigate = useNavigate()
 
@@ -66,13 +67,36 @@ function LoginPage() {
     event.preventDefault()
     setMessage('')
 
-    if (mode === 'signup') {
-      const { error } = await supabase.auth.signUp({ email, password })
-      if (error) {
-        setMessage(error.message)
-      } else {
-        setMessage('Vérifie ton email pour confirmer ton compte.')
+    if (mode === 'modifyMdp') {
+      const { data, error: loginError } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password
+        })
+
+      if (loginError) {
+        setMessage('Mot de passe actuel incorrect.')
+        return
       }
+
+      const { error: updateError } =
+        await supabase.auth.updateUser({
+          password: newPassword
+        })
+
+      if (updateError) {
+        setMessage(updateError.message)
+        return
+      }
+
+      await supabase.auth.signOut()
+
+      setMessage('Mot de passe modifié avec succès.')
+
+      setPassword('')
+      setNewPassword('')
+      setMode('login')
+
       return
     }
 
@@ -129,7 +153,7 @@ function LoginPage() {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password" className="form-label">Mot de passe</label>
+            <label htmlFor="password" className="form-label">{mode === 'login' ? 'Mot de passe' : 'Mot de passe actuel'}</label>
             <input
               id="password"
               className="input"
@@ -140,9 +164,31 @@ function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+          {mode === 'modifyMdp' && (
+          <div className="form-group">
+            <label htmlFor="newPassword" className="form-label">Nouveau mot de passe</label>
+            <input
+              id="newPassword"
+              className="input"
+              type="password"
+              required
+              placeholder="••••••••"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+          </div>
+          )}
           <button className="button button-login" type="submit">
-            {mode === 'login' ? 'Se connecter' : 'Créer un compte'}
+            {mode === 'login' ? 'Se connecter' : 'Valider nouveau mot de passe'}
           </button>
+
+          {mode === 'modifyMdp' && (
+            <button className="button" type="button" onClick={() => navigate(0)}>
+              Annuler
+            </button>
+          )}
+
+
         </form>
 
         {message ? (
@@ -155,10 +201,11 @@ function LoginPage() {
           <button
             className="login-toggle-btn"
             type="button"
-            onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+            onClick={() => setMode(mode === 'login' ? 'modifyMdp' : 'login')}
           >
-            {mode === 'login' ? "Je n'ai pas de compte" : `J'ai déjà un compte`}
+            {mode === 'login' ? "Modifier mot de passe" : ``}
           </button>
+          
         </div>
       </div>
     </div>
