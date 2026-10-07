@@ -58,7 +58,13 @@ function App() {
         />
 
       </Routes>
+
+      <footer className="app-footer">
+          Cooked with ❤️ by Wanda
+      </footer>
+
     </div>
+
   )
 }
 
